@@ -224,7 +224,7 @@ class GTD
     public function do___logout()
     {
         $this->setCurrentLogin(false);
-        header('Location: ./');
+        header('Location: ./index.php');
         exit;
     }
 
@@ -748,7 +748,7 @@ class GTD
                 }
                 if (!$found) $auth->error = "Nom d'utilisateur ou mot de passe invalide";
             }
-            header('Location: ./' . ($auth->error ? '?_aerr=' . urlencode($auth->error ?: "Erreur inconnue") : ''));
+            header('Location: ./index.php' . ($auth->error ? '?_aerr=' . urlencode($auth->error ?: "Erreur inconnue") : ''));
             exit;
         }
 
@@ -903,7 +903,7 @@ $$$$$$\ \$$\       $$ |$$$$\   $$ |   $$ |  $$ |      $$  /$$$$$$\
             <strong>Git Tug Deployer</strong>
             <em>~ Web Console</em>
             <?php if ($auth->as): ?>
-                <a href="./?d=logout">
+                <a href="./index.php?d=logout">
                     <em>Déconnexion</em>
                     <span class="material-icons-outlined">close</span>
                 </a>
@@ -957,7 +957,7 @@ $$$$$$\ \$$\       $$ |$$$$\   $$ |   $$ |  $$ |      $$  /$$$$$$\
                 <strong>Journal</strong>
                 <div
                     id="log-items"
-                    data-url="./?d=getLog&offset={offset}&length={length}"
+                    data-url="./index.php?d=getLog&offset={offset}&length={length}"
                     data-refresh-delay="<?php echo $this->cfg('log.web_refresh_delay'); ?>"
                     ></div>
             </div>
@@ -1010,7 +1010,7 @@ $$$$$$\ \$$\       $$ |$$$$\   $$ |   $$ |  $$ |      $$  /$$$$$$\
                     </ul>
                     <hr>
                     <p>
-                        <a href="./?d=genKeys" target="innerframe" class="button button-small">Générer des clés</a>
+                        <a href="./index.php?d=genKeys" target="innerframe" class="button button-small">Générer des clés</a>
                         pour les insérer dans le fichier <code>config.ini</code>.
                     </p>
                 </blockquote>
