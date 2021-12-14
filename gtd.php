@@ -397,14 +397,12 @@ class GTD
         $byKey = [];
         $byHash = [];
         $hashMethod = $this->cfg('security.hash_method');
-        $finalSlash = $this->cfg('web.append_slash_after_path') ? '/' : '';
         foreach ($this->cfg('security.hook_keys') as $k) {
             $hash = hash($hashMethod, $k);
             $url = $_SERVER['REQUEST_SCHEME'] . '://'
                 . $_SERVER['HTTP_HOST']
                 . rtrim($_SERVER['REQUEST_URI'], '/')
-                . $finalSlash
-                . '?' . self::HOOK_KEY_PARAM . '=' . $hash;
+                . '/index.php?' . self::HOOK_KEY_PARAM . '=' . $hash;
 
             $byKey[$k] = $url;
             $byHash[$hash] = (object) [ 'key' => $k, 'url' => $url ];
@@ -660,7 +658,6 @@ class GTD
 
             'web.enabled'                 => 'off',
             'web.login'                   => [],
-            'web.append_slash_after_path' => 'off',
 
         ], parse_ini_file($path));
 
@@ -915,7 +912,7 @@ $$$$$$\ \$$\       $$ |$$$$\   $$ |   $$ |  $$ |      $$  /$$$$$$\
 
         <div class="wrapper">
             <div id="auth">
-                <form action="." method="post">
+                <form action="./index.php" method="post">
                     <div class="field">
                         <label class="label">Nom d'utilisateur</label>
                         <input
