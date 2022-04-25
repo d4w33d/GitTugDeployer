@@ -12,14 +12,14 @@
 
 ##### Index
 * [Vue générale](#ov)
-** [Cas d'utilisation standard](#ov-usecase)
+    * [Cas d'utilisation standard](#ov-usecase)
 * [Getting started](#gs)
-** [Préparation de Git Tug Deployer](#gs-gtd)
-** [Préparation du dépôt](#gs-repository)
-*** [BitBucket](#gs-repository-bitbucket)
-** [Préparation du serveur](#gs-server)
-*** [Systemd](#gs-server-systemd)
-*** [Crontask](#gs-server-crontask)
+    * [Préparation de Git Tug Deployer](#gs-gtd)
+    * [Préparation du dépôt](#gs-repository)
+        * [BitBucket](#gs-repository-bitbucket)
+    * [Préparation du serveur](#gs-server)
+        * [Systemd](#gs-server-systemd)
+        * [Crontask](#gs-server-crontask)
 
 <a name="ov" />
 
@@ -37,13 +37,19 @@ du code poussé sur un un dépôt Git.**
 3. Lorsque le serveur de BitBucket reçoit le `commit`, ce dernier appelle un URL pré-configuré : l'URL de GTD ;
 4. GTD vérifie si les métadonnées du `commit` correspondent bien à celles requises dans la configuration ;
 5. Si c'est le cas, deux options :
-    * Le `daemon` est configuré. Dans ce cas GTD marque la requête de déploiement.
-        Un worker de type crontâche ou tâche de fond vérifie régulièrement ce marquage,
-        et lorsqu'il est positif, réalise le déploiement en effectuant un `git pull` dans le répertoire
-        de travail du serveur ;
-    * Le `daemon` n'est pas configuré. Dans ce cas, GTD tente directement un `git pull`.
+    * Le `daemon` est configuré.
+
+      Dans ce cas GTD marque la requête de déploiement.
+      Un worker de type crontâche ou tâche de fond vérifie régulièrement ce marquage,
+      et lorsqu'il est positif, réalise le déploiement en effectuant un `git pull` dans le répertoire
+      de travail du serveur ;
+
+    * Le `daemon` n'est pas configuré.
+
+      Dans ce cas, GTD tente directement un `git pull`.
 
 **Avantage et désavantages du `daemon` :**
+
 * Exécute le `git pull` avec les droits utilisateur déterminés, au lieu du seul `www-data` de PHP ;
 * Gère les commits lourds et longs ;
 * En revanche, nécessite de configurer une crontâche et/ou de paramétrer
@@ -57,21 +63,21 @@ du code poussé sur un un dépôt Git.**
 
 ## Préparation de Git Tug Deployer
 
-1. Télécharger [l'archive du dépôt GTD](https://github.com/d4w33d/GitTugDeployer/archive/refs/heads/main.zip)
-2. Décompresser l'archive au sein du dossier de travail du projet
+1. **Télécharger** [l'archive du dépôt GTD](https://github.com/d4w33d/GitTugDeployer/archive/refs/heads/main.zip)
+2. **Décompresser** l'archive au sein du dossier de travail du projet
     (aka quelque part dans l'arborescence du dépôt, par exemple à la racine)
-3. Copier `config-sample.ini` vers `config.ini`
+3. Copier `config-sample.ini` vers **`config.ini`**
 4. Dans `config.ini`, éditer (au minimum) ces paramètres :
-    * `repository.root_directory` : indiquer le chemin valide vers la racine ;
-    * `security.hook_keys[]` : renseigner une chaîne aléatoire (alpha-numérique et symboles) de 64 caractères sur chaque ligne ;
-    * `daemon.enabled` : `on` ou `off` en fonction du choix effectué plus haut ;
-    * `git.use_ssh_key` : indiquer le chemin valide vers la clef privée SSH
+    * **`repository.root_directory`** : indiquer le chemin valide vers la racine ;
+    * **`security.hook_keys[]`** : renseigner une chaîne aléatoire (alpha-numérique et symboles) de 64 caractères sur chaque ligne ;
+    * **`daemon.enabled`** : `on` ou `off` en fonction du choix effectué plus haut ;
+    * **`git.use_ssh_key`** : indiquer le chemin valide vers la clef privée SSH
         qui est autorisée en lecture seule sur BitBucket ou Github
         (dont la clef publique aura été paramètres dans la configuration du dépôt) ;
-    * `git.branch` : vérifier le nom de la branche qui doit être écoutée.
+    * **`git.branch`** : vérifier le nom de la branche qui doit être écoutée.
         Généralement "master" ou "main" en production, et "staging" ou "preprod" en pré-production.
-    * `web.login[]` : indiquer un nom d'utilisateur et un mot de passe qui permettront d'accéder au panneau de contrôle.
-5. Finalement, déployer ces modifications sur le dépôt (`git commit` et `git push`) ;
+    * **`web.login[]`** : indiquer un nom d'utilisateur et un mot de passe qui permettront d'accéder au panneau de contrôle.
+5. Finalement, **déployer ces modifications** sur le dépôt (`git commit` et `git push`) ;
 6. Pour vérifier que tout fonctionne correctement, vous pouvez accéder à la console en pointant
     sur le répertoire dans lequel vous avez décompressé GTD : http{s}://{racine}/{du}/{projet}/gtd,
     et en utilisant les identifiants de connexion indiqués dans `web.login[]`.
