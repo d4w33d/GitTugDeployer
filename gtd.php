@@ -3,11 +3,11 @@
 /*
  * The Software is provided to you by the Licensor under the License,
  * as defined below, subject to the following condition.
- * 
+ *
  * Without limiting other conditions in the License,
  * the grant of rights under the License will not include,
  * and the License does not grant to you, the right to Sell the Software.
- * 
+ *
  * For purposes of the foregoing, "Sell" means practicing any or all of the rights
  * granted to you under the License to provide to third parties,
  * for a fee or other consideration (including without limitation fees for hosting
@@ -16,7 +16,7 @@
  * from the functionality of the Software.
  * Any license notice or attribution required by the License must also include
  * this Commons Clause License Condition notice.
- * 
+ *
  * * Software: GTD - Git Tug Deployer
  * * License: Apache 2.0
  * * Licensor: David Mougel <david@barbichette.net>
@@ -252,7 +252,7 @@ class GTD
 
     public function cli($argv = null)
     {
-        $daemonServicePath = '/etc/systemd/system/gtd.service';
+        $daemonServicePath = $_SERVER['HOME'] . '/.config/systemd/user/gtd.service';
         $isRootUser = ((int) posix_getuid()) === 0;
         $assertRootUser = function() use ($isRootUser) {
             if ($isRootUser) return;
@@ -261,12 +261,25 @@ class GTD
 
         $contexts = [
 
+            'cmd' => [
+
+                'exec' => function() use ($daemonServicePath, $assertRootUser)
+                {
+                    if ($this->getDaemonPullRequestStatus()) {
+                        $response = $this->executeHook();
+                        $this->log('Executed the pool from the cmd. Response >>' . "\n" . $response . "\n");
+                        $this->setDaemonPullRequestStatus(false);
+                    }
+                },
+
+            ],
+
             'daemon' => [
 
                 'enable' => function() use ($daemonServicePath, $assertRootUser)
                 {
-                    $assertRootUser();
                     if (is_file($daemonServicePath)) die("Daemon service seems to exists. Please disable it first.\n");
+                    if (!is_dir($daemonServiceDir = dirname($daemonServicePath))) mkdir($daemonServiceDir, 0755, true);
 
                     echo "Creating systemd service file (${daemonServicePath})...\n";
                     file_put_contents($daemonServicePath, implode("\n", [
@@ -276,21 +289,21 @@ class GTD
                         '',
                         '[Service]',
                         'Type=simple',
+                        'Environment="GTD_DAEMON_GIT_BRANCH=' . $this->cfg('git.branch') . '"',
                         'ExecStart=' . $this->joinPath($this->rootDir, 'gtd') . ' daemon watch',
-                        'User=' . $this->cfg('daemon.run_as'),
                         '',
                         '[Install]',
-                        'WantedBy=multi-user.target',
+                        'WantedBy=timers.target',
                     ]));
                     chmod($daemonServicePath, 0755);
 
                     echo "Enabling 'gtd' systemd service...\n";
-                    echo '>> ' . (trim(shell_exec('systemctl enable gtd 2>&1')) ?: '(nothing)') . "\n";
+                    echo '>> ' . (trim(shell_exec('systemctl --user enable gtd 2>&1') ?: '') ?: '(nothing)') . "\n";
 
                     echo "Starting 'gtd' systemd service...\n";
-                    echo '>> ' . (trim(shell_exec('systemctl start gtd 2>&1')) ?: '(nothing)') . "\n";
+                    echo '>> ' . (trim(shell_exec('systemctl --user start gtd 2>&1') ?: '') ?: '(nothing)') . "\n";
                     echo "Getting status of 'gtd' systemd service...\n";
-                    echo '>> ' . (trim(shell_exec('systemctl status gtd 2>&1')) ?: '(nothing)') . "\n";
+                    echo '>> ' . (trim(shell_exec('systemctl --user status gtd 2>&1') ?: '') ?: '(nothing)') . "\n";
 
                     $this->log('Enabled daemon');
 
@@ -299,12 +312,10 @@ class GTD
 
                 'disable' => function() use ($daemonServicePath, $assertRootUser)
                 {
-                    $assertRootUser();
-
                     echo "Stopping 'gtd' systemd service...\n";
-                    echo '>> ' . (trim(shell_exec('systemctl stop gtd 2>&1')) ?: '(nothing)') . "\n";
+                    echo '>> ' . (trim(shell_exec('systemctl --user stop gtd 2>&1') ?: '') ?: '(nothing)') . "\n";
                     echo "Disabling 'gtd' systemd service...\n";
-                    echo '>> ' . (trim(shell_exec('systemctl disable gtd 2>&1')) ?: '(nothing)') . "\n";
+                    echo '>> ' . (trim(shell_exec('systemctl --user disable gtd 2>&1') ?: '') ?: '(nothing)') . "\n";
                     echo "Removing systemd service file...\n";
                     if (is_file($daemonServicePath)) unlink($daemonServicePath);
 
@@ -616,7 +627,15 @@ class GTD
         if (is_string($v)) {
             if (strtolower($v) === 'on' || $v === '1') $v = true;
             else if (strtolower($v) === 'off' || $v == '0') $v = false;
-            else $v = str_replace('{gtd_root}', $this->rootDir, $v);
+            else if ($k === 'git.branch' && array_key_exists('GTD_DAEMON_GIT_BRANCH', $_SERVER)) $v = $_SERVER['GTD_DAEMON_GIT_BRANCH'];
+            else {
+                $v = str_replace('{gtd_root}', $this->rootDir, $v);
+                if (preg_match_all('/\{env:([^}]+)\}/i', $v, $matches, PREG_SET_ORDER)) {
+                    foreach ($matches as $m) {
+                        $v = str_replace($m[0], array_key_exists($m[1], $_SERVER) ? $_SERVER[$m[1]] : '', $v);
+                    }
+                }
+            }
 
             if ((strpos($v, DIRECTORY_SEPARATOR . '..') !== false
                 || strpos($v, '..' . DIRECTORY_SEPARATOR) !== false)
