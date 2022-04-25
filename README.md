@@ -10,10 +10,25 @@
   \______/   \__|   \_______/
 ```
 
+##### Index
+* [Vue générale](#ov)
+** [Cas d'utilisation standard](#ov-usecase)
+* [Getting started](#gs)
+** [Préparation de Git Tug Deployer](#gs-gtd)
+** [Préparation du dépôt](#gs-repository)
+*** [BitBucket](#gs-repository-bitbucket)
+** [Préparation du serveur](#gs-server)
+*** [Systemd](#gs-server-systemd)
+*** [Crontask](#gs-server-crontask)
+
+<a name="ov" />
+
 # Vue générale
 
 **Git Tug Deployer (GTD) permet d'automatiser le déploiement
 du code poussé sur un un dépôt Git.**
+
+<a name="ov-usecase" />
 
 ## Cas d'utilisation standard
 
@@ -34,7 +49,11 @@ du code poussé sur un un dépôt Git.**
 * En revanche, nécessite de configurer une crontâche et/ou de paramétrer
     `systemd` pour activer la tâche de fond ;
 
+<a name="gs" />
+
 # Getting started
+
+<a name="gs-gtd" />
 
 ## Préparation de Git Tug Deployer
 
@@ -57,7 +76,11 @@ du code poussé sur un un dépôt Git.**
     sur le répertoire dans lequel vous avez décompressé GTD : http{s}://{racine}/{du}/{projet}/gtd,
     et en utilisant les identifiants de connexion indiqués dans `web.login[]`.
 
+<a name="gs-repository" />
+
 ## Préparation du dépôt
+
+<a name="gs-repository-bitbucket" />
 
 ### BitBucket
 
@@ -67,12 +90,16 @@ du code poussé sur un un dépôt Git.**
 * Sur BitBucket, dans ***Repository settings*** >> ***Webhooks***, créez un nouveau Hook,
     en laissant les options par défaut et en renseignant un titre et l'URL copié dans l'étape précédente ;
 
+<a name="gs-server" />
+
 ## Préparation du serveur
 
 Si le `daemon` n'est pas activé, il n'y a aucune action spécifique à réaliser
 sur le serveur.
 
 Si le `daemon` est activé :
+
+<a name="gs-server-systemd" />
 
 ### Systemd
 
@@ -105,10 +132,12 @@ il faut dans ce cas préciser spécifiquement la branche que l'on souhaite écou
 $ GTD_DAEMON_GIT_BRANCH={listened_branch_name} {absolute_path_to_web_root}/gtd/gtd daemon watch
 ```
 
+<a name="gs-server-crontask" />
+
 ### Crontask
 
 Identifié comme utilisateur qui est en droit de réaliser le `git pull`,
-exécuter la ligne de commande `$ crontask -e` :
+exécuter la ligne de commande `$ crontab -e` :
 
 L'écriture standard de la ligne crontask est :
 
